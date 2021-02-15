@@ -8,6 +8,9 @@ SendMode, Input  ; Recommended for new scripts due to its superior speed and rel
 ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
 TabNames := "Temp|AutoRun|Hotkeys"
 
+; ---------- HOTKEY BINDING
+#h::gosub initalize_gui
+
 
 ; ---------- INSTANCE THE GUI, GENERATE_TABS, GENERATE BUTTONS, UPDATE LISTVIEW
 initalize_gui:
@@ -16,24 +19,21 @@ initalize_gui:
     Gui, ScriptManager:New ; Gui is named Script manager and accessed with colon syntax
     Gui, ScriptManager:Default
     ; Generate the tabs and listview
-    Gui, ScriptManager:Add, Tab3, w500 vLVTabs, %TabNames% ; Make a new tab container in the window
-    ; Select the list view should be put in, create list views with the following properties
-    Gui, Tab, Temp
-    Gui, LVTabs:Add, ListView, wp-25 AltSubmit glv_click vTemp Checked, ScriptName|LastChange
-    Gui, Tab, AutoRun
-    Gui, LVTabs:Add, ListView, wp AltSubmit glv_click vAutoRun, ScriptName|LastChange
-    Gui, Tab, Hotkeys
-    Gui, LVTabs:Add, ListView, wp AltSubmit glv_click vHotkeys, HotkeyName|ContainingScript
-    ; Generate a Container Box, Put the buttons in there
-    ; Gui, -Parent, Button,,fuckoy
-    Gui, ScriptManager:Add, GroupBox, w475 h100 vButtonBox, % "Manage Scripts"
-    Gui, ButtonBox:+ParentScriptManager
-    Gui, ButtonBox:Add, Button, w150, % "&New temp script"
-    Gui, ButtonBox:Add, Button, w150, % "&Open scripts folder"
+    ; Gui, LVTabs:+ParentScriptManager
+    Gui, Add, Tab3, w330 h340 vLVTabs, %TabNames% ; Make a new tab container in the window
+    Gui, Tab, Temp ; select tab Temp
+    Gui, Add, ListView, h300 w305 AltSubmit glv_click vTemp Checked, ScriptName|LastChange
+    Gui, Tab, AutoRun ; select tab AutoRun
+    Gui, Add, ListView, h300 w305  AltSubmit glv_click vAutoRun, ScriptName|LastChange
+    Gui, Tab, Hotkeys ; select tab Hotkeys
+    Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
+    ; Gui, Add, GroupBox, w475 h100 vButtonBox section, % "Manage Scripts"
+    Gui, Tab ; Tab command without further params exits the tab container
+    Gui, Add, Button, y+20 w150, % "&New temp script"
+    Gui, Add, Button, x+m w150, % "&Open scripts folder"
     ; update the listviews to show all saved scripts
     gosub update_lv
-    ;
-    Gui, ScriptManager:Show
+    Gui, Show, w350 h400
     return
 }
 
@@ -41,6 +41,7 @@ initalize_gui:
 ; ---------- UPDATE THE LISTED SCRIPTS IN ALL THE LIST VIEWS
 update_lv:
 {
+    Gui, ScriptManager:Default ; very important
     Loop, parse, TabNames, `|` ; Loop through all the tab sections
     {
         Gui, ListView, %A_LoopField% ; Select a tab, all Gui operations apply to it
@@ -76,6 +77,7 @@ lv_click:
         Menu, LVContext, Show
         Menu, LVContext, DeleteAll ; clean context menu up again
     }
+    return
 }
 
 
@@ -86,4 +88,10 @@ move_script(Name, From, To)
     global ScriptsPath
     FileMove, %ScriptsPath%\%From%\%Name%, %ScriptsPath%\%To%\%Name%
     gosub update_lv
+    return
 }
+
+
+; ---------- CLOSING THE WINDOW
+GuiClose:
+ExitApp
