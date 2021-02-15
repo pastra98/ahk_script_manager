@@ -29,8 +29,8 @@ initalize_gui:
     Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
     ; Gui, Add, GroupBox, w475 h100 vButtonBox section, % "Manage Scripts"
     Gui, Tab ; Tab command without further params exits the tab container
-    Gui, Add, Button, y+20 w150, % "&New temp script"
-    Gui, Add, Button, x+m w150, % "&Open scripts folder"
+    Gui, Add, Button, y+20 w150 gnew_script, % "&New temp script"
+    Gui, Add, Button, x+m w150 gopen_folder, % "&Open scripts folder"
     ; update the listviews to show all saved scripts
     gosub update_lv
     Gui, Show, w350 h400
@@ -61,22 +61,40 @@ update_lv:
 ; ---------- WHEN A GUI EVENT HAPPENS IN THE LISTVIEW
 lv_click:
 {
-    Gui, ScriptManager:Default ; select the Main gui (ScriptManager) -> all operations apply to it
-    Gui, ListView, %A_GuiControl% ; important: select curr. Listview through associated var
+    ; very IMPORTANT: SELECT current gui as default, SELECT clicked listview
+    Gui, ScriptManager:Default
+    Gui, ListView, %A_GuiControl%
+    LV_GetText(ScriptName, A_EventInfo)  ; store selected row name in ScriptName var
     if (A_GuiEvent = "DoubleClick")
     {
-        MsgBox, %A_DefaultListView%
+        MsgBox, Edit %ScriptName%
     }
     else if (A_GuiEvent = "RightClick")
     {
-        LV_GetText(ScriptName, A_EventInfo)  ; store selected row name in ScriptName var
-        Target := A_GuiControl="Temp" ? "AutoRun" : "Temp" ; target is opposite folder
-        ScriptMover := Func("move_script").Bind(ScriptName, A_GuiControl, Target) ; func to move script
+        ; target folder is either temp or autorun, bind arguments to mover func in context menu
+        Target := A_GuiControl="Temp" ? "AutoRun" : "Temp"
+        ScriptMover := Func("move_script").Bind(ScriptName, A_GuiControl, Target)
         ; show the context menu with option to move script using ScriptMover func
         Menu, LVContext, Add, Move Script to %Target%, % ScriptMover
         Menu, LVContext, Show
         Menu, LVContext, DeleteAll ; clean context menu up again
     }
+    return
+}
+
+
+; ---------- 
+new_script:
+{
+    MsgBox, Im a new script
+    return
+}
+
+
+; ---------- 
+open_folder:
+{
+    MsgBox, open folder
     return
 }
 
@@ -94,4 +112,7 @@ move_script(Name, From, To)
 
 ; ---------- CLOSING THE WINDOW
 GuiClose:
-ExitApp
+{
+    ExitApp
+    return
+}
