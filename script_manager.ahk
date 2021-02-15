@@ -2,31 +2,38 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
 #SingleInstance, force ; No annoying warnings
-SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SendMode, Input  ; Recommended for new scripts due to its superior speed and reliability.
 
 ; ---------- GLOBAL VARS
 ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
 TabNames := "Temp|AutoRun|Hotkeys"
-Gui, ScriptManager:New ; Gui is named Script manager and accessed with colon syntax
 
 
-; ---------- GENERATE THE 3 LIST VIEWS IN THE TABS
-generate_tabs:
+; ---------- INSTANCE THE GUI, GENERATE_TABS, GENERATE BUTTONS, UPDATE LISTVIEW
+initalize_gui:
 {
+    ; Generate the Main Gui window
+    Gui, ScriptManager:New ; Gui is named Script manager and accessed with colon syntax
+    Gui, ScriptManager:Default
+    ; Generate the tabs and listview
     Gui, ScriptManager:Add, Tab3, w500 vLVTabs, %TabNames% ; Make a new tab container in the window
     ; Select the list view should be put in, create list views with the following properties
-        ; wp-25    : width of parent - 25 (fit LV nicely in container)
-        ; AltSubmit: Accept right clicks
-        ; glv_click: Associate the lv_click label with any action in the listview
-        ; v...     : Associate a variable with the listview for easy access to it later
-        ; Checked  : Add Checkboxes
-    Gui, ScriptManager:Tab, Temp
-    Gui, Add, ListView, wp-25 AltSubmit glv_click vTemp Checked, ScriptName|LastChange
-    Gui, ScriptManager:Tab, AutoRun
-    Gui, Add, ListView, wp-25 AltSubmit glv_click vAutoRun, ScriptName|LastChange
-    Gui, ScriptManager:Tab, Hotkeys
-    Gui, Add, ListView, wp-25 AltSubmit glv_click vHotkeys, HotkeyName|ContainingScript
+    Gui, Tab, Temp
+    Gui, LVTabs:Add, ListView, wp-25 AltSubmit glv_click vTemp Checked, ScriptName|LastChange
+    Gui, Tab, AutoRun
+    Gui, LVTabs:Add, ListView, wp AltSubmit glv_click vAutoRun, ScriptName|LastChange
+    Gui, Tab, Hotkeys
+    Gui, LVTabs:Add, ListView, wp AltSubmit glv_click vHotkeys, HotkeyName|ContainingScript
+    ; Generate a Container Box, Put the buttons in there
+    ; Gui, -Parent, Button,,fuckoy
+    Gui, ScriptManager:Add, GroupBox, w475 h100 vButtonBox, % "Manage Scripts"
+    Gui, ButtonBox:+ParentScriptManager
+    Gui, ButtonBox:Add, Button, w150, % "&New temp script"
+    Gui, ButtonBox:Add, Button, w150, % "&Open scripts folder"
+    ; update the listviews to show all saved scripts
     gosub update_lv
+    ;
+    Gui, ScriptManager:Show
     return
 }
 
@@ -34,7 +41,6 @@ generate_tabs:
 ; ---------- UPDATE THE LISTED SCRIPTS IN ALL THE LIST VIEWS
 update_lv:
 {
-    Gui, ScriptManager:Default ; select the Main gui (ScriptManager) -> all operations apply to it
     Loop, parse, TabNames, `|` ; Loop through all the tab sections
     {
         Gui, ListView, %A_LoopField% ; Select a tab, all Gui operations apply to it
@@ -47,7 +53,6 @@ update_lv:
         }
         LV_ModifyCol()
     }
-    Gui, ScriptManager:Show
     return
 }
 
