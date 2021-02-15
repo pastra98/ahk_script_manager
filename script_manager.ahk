@@ -40,7 +40,7 @@ update_lv:
         Gui, ListView, %A_LoopField% ; Select a tab, all Gui operations apply to it
         LV_Delete() ; delete all entries in the listview
         ; if (A_LoopField in ["Temp","AutoRun"])
-        Loop Files, %ScriptsPath%\%A_LoopField%\*.ahk
+        Loop, Files, %ScriptsPath%\%A_LoopField%\*.ahk
         {
             FormatTime, LastModified, A_LoopFileTimeModified, dd. MMM yy
             LV_Add("", A_LoopFileName, LastModified)
