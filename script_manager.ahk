@@ -1,15 +1,20 @@
-﻿; ---------- COMMANDS
+﻿; ---------- SCRIPT COMMANDS
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
 #SingleInstance, force ; No annoying warnings
 SendMode, Input  ; Recommended for new scripts due to its superior speed and reliability.
 
 ; ---------- GLOBAL VARS
-ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
-TabNames := "Temp|AutoRun|Hotkeys"
+global ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
+global TabNames := "Temp|AutoRun|Hotkeys"
 
-; ---------- HOTKEY BINDING
-#h::gosub initalize_main
+; ---------- HOTKEY BINDINGS
+#h::gosub initalize_main ; Super + H -> open Manager
+#IfWinActive script_manager.ahk ; while Manager open, ctrl + r / f5 -> refresh lv list
+^r::
+F5::
+gosub update_lv
+return
 
 
 ; ---------- INSTANCE THE GUI, GENERATE_TABS, GENERATE BUTTONS, UPDATE LISTVIEW
@@ -29,7 +34,7 @@ initalize_main:
     Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
     ; Gui, Add, GroupBox, w475 h100 vButtonBox section, % "Manage Scripts"
     Gui, Tab ; Tab command without further params exits the tab container
-    Gui, Add, Button, y+20 w150 ginitialize_new_script, % "&New temp script"
+    Gui, Add, Button, y+20 w150 ginitialize_new_script_dialogue Default, % "&New temp script"
     Gui, Add, Button, x+m w150 gopen_folder, % "&Open scripts folder"
     ; update the listviews to show all saved scripts
     gosub update_lv
@@ -67,7 +72,7 @@ lv_click:
     LV_GetText(ScriptName, A_EventInfo)  ; store selected row name in ScriptName var
     if (A_GuiEvent = "DoubleClick")
     {
-        MsgBox, Edit %ScriptName%
+        edit_script(A_GuiControl, ScriptName)
     }
     else if (A_GuiEvent = "RightClick")
     {
@@ -84,23 +89,32 @@ lv_click:
 
 
 ; ---------- 
-initialize_new_script:
+initialize_new_script_dialogue:
 {
     Gui, NewScriptDialogue:New
+    Gui, NewScriptDialogue:Default
     Gui, Add, Text, , Enter Script Name (no extension)
     Gui, Add, Edit, r1 w160 vNewScriptName, new_script
-    Gui, Add, Button, y+m +Default gedit_new_script, &New Script
-    Gui, Add, Button, x+m , &Cancel
+    Gui, Add, Button, y+m +Default gnew_temp_script, &New Script
+    Gui, Add, Button, x+m gNewScriptDialogueGuiClose, &Cancel
     Gui, Show
     return
 }
 
 
 ; ---------- 
-edit_new_script:
+new_temp_script:
 {
-    Gui, Submit, NoHide
-    MsgBox, %NewScriptName%
+    Gui, NewScriptDialogue:Submit ; Capture the NewScriptName variable from the Edit Control
+    edit_script("Temp", NewScriptName ".ahk")
+    return
+}
+
+
+; ---------- 
+edit_script(Location, Name)
+{
+    Run, "Code" %ScriptsPath%\%Location%\%Name%
     return
 }
 
@@ -117,17 +131,18 @@ open_folder:
 move_script(Name, From, To)
 {
     ; ADD LABEL TO REFRESH ALL THINGS IN LV
-    global ScriptsPath
     FileMove, %ScriptsPath%\%From%\%Name%, %ScriptsPath%\%To%\%Name%
     gosub update_lv
     return
 }
 
 
-; ---------- CLOSING THE WINDOW
-GuiEscape:
-GuiClose:
+; ---------- CLOSING THE WINDOWS
+NewScriptDialogueGuiEscape:
+NewScriptDialogueGuiClose:
+ScriptManagerGuiEscape:
+ScriptManagerGuiClose:
 {
-    ExitApp
+    Gui, Destroy
     return
 }
