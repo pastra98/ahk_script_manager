@@ -9,11 +9,11 @@ ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 
 TabNames := "Temp|AutoRun|Hotkeys"
 
 ; ---------- HOTKEY BINDING
-#h::gosub initalize_gui
+#h::gosub initalize_main
 
 
 ; ---------- INSTANCE THE GUI, GENERATE_TABS, GENERATE BUTTONS, UPDATE LISTVIEW
-initalize_gui:
+initalize_main:
 {
     ; Generate the Main Gui window
     Gui, ScriptManager:New ; Gui is named Script manager and accessed with colon syntax
@@ -29,7 +29,7 @@ initalize_gui:
     Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
     ; Gui, Add, GroupBox, w475 h100 vButtonBox section, % "Manage Scripts"
     Gui, Tab ; Tab command without further params exits the tab container
-    Gui, Add, Button, y+20 w150 gnew_script, % "&New temp script"
+    Gui, Add, Button, y+20 w150 ginitialize_new_script, % "&New temp script"
     Gui, Add, Button, x+m w150 gopen_folder, % "&Open scripts folder"
     ; update the listviews to show all saved scripts
     gosub update_lv
@@ -84,9 +84,23 @@ lv_click:
 
 
 ; ---------- 
-new_script:
+initialize_new_script:
 {
-    MsgBox, Im a new script
+    Gui, NewScriptDialogue:New
+    Gui, Add, Text, , Enter Script Name (no extension)
+    Gui, Add, Edit, r1 w160 vNewScriptName, new_script
+    Gui, Add, Button, y+m +Default gedit_new_script, &New Script
+    Gui, Add, Button, x+m , &Cancel
+    Gui, Show
+    return
+}
+
+
+; ---------- 
+edit_new_script:
+{
+    Gui, Submit, NoHide
+    MsgBox, %NewScriptName%
     return
 }
 
@@ -111,6 +125,7 @@ move_script(Name, From, To)
 
 
 ; ---------- CLOSING THE WINDOW
+GuiEscape:
 GuiClose:
 {
     ExitApp
