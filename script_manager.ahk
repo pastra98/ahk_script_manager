@@ -123,7 +123,7 @@ lv_enter:
 }
 
 
-; ---------- IF LISTVIEW ROW SELECTED, EDIT SCRIPT, ELSE OPEN NEW SCRIPT
+; ---------- OPEN THE NEW SCRIPT DIALOGUE GUI
 init_new_script_gui:
 {
     Gui, NewScriptDialogue:New
