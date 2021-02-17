@@ -1,7 +1,7 @@
 ﻿; ---------- SCRIPT COMMANDS
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
-#SingleInstance, force ; No annoying warnings
+#SingleInstance, force ; Always just one instance running
 SendMode, Input  ; Recommended for new scripts due to its superior speed and reliability.
 
 ; ---------- GLOBAL VARS
@@ -63,6 +63,13 @@ update_lv:
 }
 
 
+; ---------- 
+link_autoruns_to_startup:
+{
+
+}
+
+
 ; ---------- WHEN A GUI EVENT HAPPENS IN THE LISTVIEW
 lv_click:
 {
@@ -115,6 +122,7 @@ new_temp_script:
 edit_script(Location, Name)
 {
     Run, "Code" %ScriptsPath%\%Location%\%Name%
+    ; Run, "Notepad++" %ScriptsPath%\%Location%\%Name%
     return
 }
 
@@ -122,7 +130,7 @@ edit_script(Location, Name)
 ; ---------- 
 open_folder:
 {
-    MsgBox, open folder
+    Run, %ScriptsPath%
     return
 }
 
