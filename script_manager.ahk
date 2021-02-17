@@ -1,12 +1,17 @@
 ﻿; ---------- SCRIPT COMMANDS
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  ; Enable warnings to assist with detecting common errors.
-#SingleInstance, force ; Always just one instance running
-SendMode, Input  ; Recommended for new scripts due to its superior speed and reliability.
+#NoEnv                  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#Warn                   ; Hopefully Usefull Warnings
+#SingleInstance, force  ; Always just one instance running
+SendMode, Input         ; Recommended for new scripts due to its superior speed and reliability.
 
 ; ---------- GLOBAL VARS
 global ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
 global TabNames := "Temp|AutoRun|Hotkeys"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TESTING AREA
+gosub link_autoruns_to_startup
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; ---------- HOTKEY BINDINGS
 #h::gosub initalize_main ; Super + H -> open Manager
@@ -63,10 +68,23 @@ update_lv:
 }
 
 
-; ---------- 
+; ---------- SYNC SHORTCUTS IN SHELL:AUTOSTART TO FILES IN AHK_SCIPTS\AUTORUN
 link_autoruns_to_startup:
 {
-
+    FilesInAutoRun := "" ; 
+    Loop, Files, %ScriptsPath%\AutoRun\*.ahk
+    {
+        FilesInAutoRun := FilesInAutoRun . StrSplit(A_LoopFileName, ".")[1] . ","
+        FileCreateShortcut, %A_LoopFilePath%, %A_Startup%\%A_LoopFileName%.lnk
+    }
+    Loop, Files, %A_Startup%\*.ahk.lnk
+    {
+        NameNoExt := StrSplit(A_LoopFileName, ".")[1]
+        if NameNoExt not in %FilesInAutoRun%
+        {
+            FileDelete, %A_LoopFilePath%
+        }
+    }
 }
 
 
