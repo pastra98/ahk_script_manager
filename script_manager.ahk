@@ -7,9 +7,10 @@ SendMode, Input         ; Recommended for new scripts due to its superior speed 
 ; ---------- GLOBAL VARS
 global ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
 global TabNames := "Temp|AutoRun|Hotkeys"
+global ChosenEditor := "Code" ; The editor for script, could also be "Notepad++"
 
 ; ---------- HOTKEY BINDINGS
-#h::gosub initalize_main ; Super + H -> open Manager
+#h::gosub init_main_gui ; Super + H -> open Manager
 #IfWinActive script_manager.ahk ; while Manager open, ctrl + r / f5 -> refresh lv list
 ^r::
 F5::
@@ -18,7 +19,7 @@ return
 
 
 ; ---------- INSTANCE THE GUI, GENERATE_TABS, GENERATE BUTTONS, UPDATE LISTVIEW
-initalize_main:
+init_main_gui:
 {
     ; Generate the Main Gui window
     Gui, ScriptManager:New ; Gui is named Script manager and accessed with colon syntax
@@ -32,10 +33,11 @@ initalize_main:
     Gui, Add, ListView, h300 w305  AltSubmit glv_click vAutoRun, ScriptName|LastChange
     Gui, Tab, Hotkeys ; select tab Hotkeys
     Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
-    ; Gui, Add, GroupBox, w475 h100 vButtonBox section, % "Manage Scripts"
     Gui, Tab ; Tab command without further params exits the tab container
-    Gui, Add, Button, y+20 w150 ginitialize_new_script_dialogue Default, % "&New temp script"
+    ; Buttons for making new script and opening scripts folder
+    Gui, Add, Button, y+20 w150 ginit_new_script_gui -Default, % "&New temp script"
     Gui, Add, Button, x+m w150 gopen_folder, % "&Open scripts folder"
+    Gui, Add, Button, x+m w0 glv_enter Hidden Default, % "edit script" ; hidden, enter to edit
     ; update the listviews to show all saved scripts
     gosub update_lv
     Gui, Show, w350 h400
@@ -108,8 +110,21 @@ lv_click:
 }
 
 
-; ---------- 
-initialize_new_script_dialogue:
+; ---------- EDIT LISTVIEW SCRIPT, TRIGGERED BY HIDDEN BUTTON
+lv_enter:
+{
+    LV_GetText(ScriptName, LV_GetNext(0, "Focused"))
+    if (ScriptName != "ScriptName")
+    {
+        GuiControlGet, FocusedControl, FocusV
+        edit_script(FocusedControl, ScriptName)
+    }
+    return
+}
+
+
+; ---------- IF LISTVIEW ROW SELECTED, EDIT SCRIPT, ELSE OPEN NEW SCRIPT
+init_new_script_gui:
 {
     Gui, NewScriptDialogue:New
     Gui, NewScriptDialogue:Default
@@ -122,7 +137,7 @@ initialize_new_script_dialogue:
 }
 
 
-; ---------- 
+; ---------- WHEN NEWSCRIPTDIALOGUE IS CONFIRMED, MAKE NEW SCRIPT
 new_temp_script:
 {
     Gui, NewScriptDialogue:Submit ; Capture the NewScriptName variable from the Edit Control
@@ -131,16 +146,15 @@ new_temp_script:
 }
 
 
-; ---------- 
-edit_script(Location, Name)
+; ---------- OPEN EXISTING/NEW FILE IN CHOSEN EDITOR
+edit_script(Folder, Name)
 {
-    Run, "Code" %ScriptsPath%\%Location%\%Name%
-    ; Run, "Notepad++" %ScriptsPath%\%Location%\%Name%
+    Run, "%ChosenEditor%" %ScriptsPath%\%Folder%\%Name%
     return
 }
 
 
-; ---------- 
+; ---------- OPEN THE PARENT FOLDER (SCRIPTSPATH)
 open_folder:
 {
     Run, %ScriptsPath%
