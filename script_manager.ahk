@@ -8,11 +8,6 @@ SendMode, Input         ; Recommended for new scripts due to its superior speed 
 global ScriptsPath := SubStr(A_WorkingDir, 1, InStr(SubStr(A_WorkingDir,1,-1), "\", 0, 0)-1)
 global TabNames := "Temp|AutoRun|Hotkeys"
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; TESTING AREA
-gosub link_autoruns_to_startup
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ; ---------- HOTKEY BINDINGS
 #h::gosub initalize_main ; Super + H -> open Manager
 #IfWinActive script_manager.ahk ; while Manager open, ctrl + r / f5 -> refresh lv list
@@ -159,6 +154,7 @@ move_script(Name, From, To)
     ; ADD LABEL TO REFRESH ALL THINGS IN LV
     FileMove, %ScriptsPath%\%From%\%Name%, %ScriptsPath%\%To%\%Name%
     gosub update_lv
+    gosub link_autoruns_to_startup
     return
 }
 
