@@ -40,6 +40,7 @@ init_main_gui:
     Gui, Add, Button, x+m w0 glv_enter Hidden Default, % "edit script" ; hidden, enter to edit
     ; update the listviews to show all saved scripts
     gosub update_lv
+    gosub link_autoruns_to_startup
     Gui, Show, w350 h400
     return
 }
