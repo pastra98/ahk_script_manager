@@ -34,9 +34,10 @@ init_main_gui:
     Gui, Tab, Hotkeys ; select tab Hotkeys
     Gui, Add, ListView, h300 w305 glv_click vHotkeys, HotkeyName|ContainingScript
     Gui, Tab ; Tab command without further params exits the tab container
-    ; Buttons for making new script and opening scripts folder
-    Gui, Add, Button, y+20 w150 ginit_new_script_gui -Default, % "&New temp script"
-    Gui, Add, Button, x+m w150 gopen_folder, % "&Open scripts folder"
+    ; Buttons for making new script, opening autorun folder, and opening scripts folder
+    Gui, Add, Button, y+20 w100 ginit_new_script_gui -Default, % "&New temp script"
+    Gui, Add, Button, x+m w100 gopen_autorun_folder, % "&Open autorun folder"
+    Gui, Add, Button, x+m w100 gopen_folder, % "&Open scripts folder"
     Gui, Add, Button, x+m w0 glv_enter Hidden Default, % "edit script" ; hidden, enter to edit
     ; update the listviews to show all saved scripts
     gosub update_lv
@@ -44,6 +45,7 @@ init_main_gui:
     Gui, Show, w350 h400
     return
 }
+
 
 
 ; ---------- UPDATE THE LISTED SCRIPTS IN ALL THE LIST VIEWS
@@ -85,7 +87,6 @@ link_autoruns_to_startup:
     }
 }
 
-
 ; ---------- WHEN A GUI EVENT HAPPENS IN THE LISTVIEW
 lv_click:
 {
@@ -107,6 +108,13 @@ lv_click:
         Menu, LVContext, Show
         Menu, LVContext, DeleteAll ; clean context menu up again
     }
+    return
+}
+
+; ---------- OPEN THE AUTORUN FOLDER
+open_autorun_folder:
+{
+    Run, %A_Startup%
     return
 }
 
